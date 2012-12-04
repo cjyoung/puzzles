@@ -46,7 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="word_friends\word.list" />
+    <Content Include="word_friends\word.list">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="reducible_words\words.txt" />

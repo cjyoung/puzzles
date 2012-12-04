@@ -11,6 +11,10 @@ namespace FriendWords
 {
     class Program
     {
+        const bool USE_WEBSITE_LIST = false;
+        const string WEBSITE_URL = "https://github.com/causes/puzzles/raw/master/word_friends/word.list";
+        const string PATH_TO_WORDLIST = "word_friends/word.list";
+
         static void Main(string[] args)
         {
             //trying enumerables - too much overhead, recreating list with each call, not easily updatable
@@ -20,7 +24,7 @@ namespace FriendWords
             //still taking ~60s to reach 2500 - trying search for possible matches vs list of all words
             //iterating through all possible 1-levdist from each friend has reduced time dramatically as opposed to 
             //  multiple scans against the large dictionary of all terms - checking in to github before breaking anything
-            //  (~13s on beast computer, ~23 on slower one)
+            //  (~13s on beast computer, ~30s on slower one)
 
             //Two words are friends if they have a Levenshtein distance (http://en.wikipedia.org/wiki/Levenshtein_distance) of 1.
             //That is, you can add, remove, or substitute exactly one letter in word X to create word Y.
@@ -28,10 +32,14 @@ namespace FriendWords
             //Write a program to tell us how big the social network for the word “causes” is, using this word list
             //(https://github.com/causes/puzzles/raw/master/word_friends/word.list).
 
-            string url = "https://github.com/causes/puzzles/raw/master/word_friends/word.list";
             string startWord = "causes";
 
-            Dictionary<string, bool> wordList = GetWordList(url); //string - word; bool - whether it's in the network
+            Dictionary<string, bool> wordList;
+
+            if (USE_WEBSITE_LIST)
+                wordList = GetWordListFromWeb(WEBSITE_URL); //string - word; bool - whether it's in the network
+            else
+                wordList = GetWordListFromFile(PATH_TO_WORDLIST);
 
             int count = 0;
             Stack<string> friends = new Stack<string>();
@@ -105,7 +113,7 @@ namespace FriendWords
             Console.ReadKey();
         }
 
-        private static Dictionary<string, bool> GetWordList(string url)
+        private static Dictionary<string, bool> GetWordListFromWeb(string url)
         {
             string result = "";
             Dictionary<string, bool> wordList = new Dictionary<string, bool>();
@@ -132,6 +140,27 @@ namespace FriendWords
             {
                 //use dictionary, quicker to look up, no dupes, value determines if part of network
                 wordList = result.Split('\n').Select(n => n).ToDictionary(k => k, v => false);
+                Console.WriteLine("Retrieved {0} Word(s)", wordList.Count());
+            }
+
+            return wordList;
+        }
+
+        private static Dictionary<string, bool> GetWordListFromFile(string file)
+        {
+            Dictionary<string, bool> wordList = new Dictionary<string, bool>();
+
+            Console.WriteLine("Reading Word List from: {0}", file);
+            try
+            {
+                wordList = File.ReadLines(file).ToDictionary(k => k, v => false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: {0}", ex.Message);
+            }
+            finally
+            {
                 Console.WriteLine("Retrieved {0} Word(s)", wordList.Count());
             }
 
