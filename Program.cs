@@ -183,8 +183,10 @@ namespace FriendWords
             }
             finally
             {
-                foreach (string item in result.Split('\n'))
+                foreach (string item in result.Split(new string[] { "\r\n", "\n" },
+                            StringSplitOptions.RemoveEmptyEntries))
                     wordList.TryAdd(item, false);
+                
 
                 Console.WriteLine("Retrieved {0} Word(s)", wordList.Count());
             }
